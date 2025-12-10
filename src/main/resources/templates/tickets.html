@@ -1,21 +1,129 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Управление билетами</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Управление билетами — Справочная система театра</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Arial Black', sans-serif;
+            background-color: #f5f5f5;
+            color: #321b0c;
+        }
+
+        /* Шапка как на главной */
+        .w3-top .w3-button { font-weight: bold; }
+
+        /* Основной контейнер */
+        .container {
+            max-width: 1200px;
+            margin: 120px auto 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Заголовок */
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            color: #321b0c;
+        }
+
+        /* Приветствие */
+        .user-greeting {
+            text-align: center;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        /* Таблица билетов */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #321b0c;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) { background-color: #fdfdfd; }
+        tr:hover { background-color: #f0e8df; }
+
+        /* Кнопки */
+        .button, .add-btn, .edit-btn, .delete-btn {
+            background-color: #321b0c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .button:hover, .add-btn:hover, .edit-btn:hover, .delete-btn:hover {
+            background-color: #4b3224;
+        }
+
+        /* Форма добавления билетов */
+        .add-form {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .add-form input {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #321b0c;
+            min-width: 200px;
+        }
+
+    </style>
 </head>
 <body>
-<div class="container">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h1>🎟️ Управление билетами</h1>
-        <div>
-            <span sec:authorize="isAuthenticated()">Привет, <b sec:authentication="name"></b></span>
-            <form th:action="@{/logout}" method="post" style="display:inline" sec:authorize="isAuthenticated()">
+
+<!-- Шапка -->
+<div class="w3-top">
+    <div class="w3-row w3-padding w3-black">
+        <div class="w3-col s3">
+            <a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a>
+        </div>
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <form th:action="@{/logout}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button class="button" type="submit">Выйти</button>
+                <button class="w3-button w3-block w3-black" type="submit">Выйти</button>
             </form>
         </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <h1>Управление билетами</h1>
+
+    <div class="user-greeting" sec:authorize="isAuthenticated()">
+        Привет, <b sec:authentication="name"></b>
     </div>
 
     <form th:action="@{/tickets/add}" th:object="${ticket}" method="post" class="add-form" sec:authorize="hasRole('ADMIN')">
@@ -53,68 +161,7 @@
         </tbody>
     </table>
 
-    <div style="text-align: center; margin-top: 25px;">
-        <a th:href="@{/}" class="button">На главную</a>
-    </div>
 </div>
+
 </body>
 </html>
-
-
-
-<!--<!DOCTYPE html>-->
-<!--<html xmlns:th="http://www.thymeleaf.org" lang="ru">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <title>Управление билетами</title>-->
-<!--    <link rel="stylesheet" th:href="@{/css/style.css}">-->
-<!--</head>-->
-<!--<body>-->
-<!--<div class="container">-->
-<!--    <h1>🎟️ Управление билетами</h1>-->
-
-<!--    <form th:action="@{/tickets/add}" th:object="${ticket}" method="post" class="add-form">-->
-<!--        <input type="text" th:field="*{eventName}" placeholder="Название события" required>-->
-<!--        <div th:if="${#fields.hasErrors('eventName')}" th:errors="*{eventName}" class="error"></div>-->
-
-<!--        <input type="text" th:field="*{buyerName}" placeholder="Имя покупателя" required>-->
-<!--        <div th:if="${#fields.hasErrors('buyerName')}" th:errors="*{buyerName}" class="error"></div>-->
-
-<!--        <input type="text" th:field="*{seatNumber}" placeholder="Номер места" required>-->
-<!--        <div th:if="${#fields.hasErrors('seatNumber')}" th:errors="*{seatNumber}" class="error"></div>-->
-
-<!--        <button type="submit" class="add-btn">Добавить билет</button>-->
-<!--    </form>-->
-
-<!--    <table>-->
-<!--        <thead>-->
-<!--        <tr>-->
-<!--            <th>ID</th>-->
-<!--            <th>Событие</th>-->
-<!--            <th>Покупатель</th>-->
-<!--            <th>Место</th>-->
-<!--            <th>Действия</th>-->
-<!--        </tr>-->
-<!--        </thead>-->
-<!--        <tbody>-->
-<!--        <tr th:each="ticket : ${tickets}">-->
-<!--            <td th:text="${ticket.id}"></td>-->
-<!--            <td th:text="${ticket.eventName}"></td>-->
-<!--            <td th:text="${ticket.buyerName}"></td>-->
-<!--            <td th:text="${ticket.seatNumber}"></td>-->
-<!--            <td>-->
-<!--                <a th:href="@{'/tickets/edit/' + ${ticket.id}}" class="edit-btn">✏️</a>-->
-<!--                <form th:action="@{'/tickets/delete/' + ${ticket.id}}" method="post" style="display:inline;">-->
-<!--                    <button type="submit" class="delete-btn" onclick="return confirm('Удалить билет?')">🗑️</button>-->
-<!--                </form>-->
-<!--            </td>-->
-<!--        </tr>-->
-<!--        </tbody>-->
-<!--    </table>-->
-
-<!--    <div style="text-align: center; margin-top: 25px;">-->
-<!--        <a th:href="@{/}" class="button">🏠 На главную</a>-->
-<!--    </div>-->
-<!--</div>-->
-<!--</body>-->
-<!--</html>-->

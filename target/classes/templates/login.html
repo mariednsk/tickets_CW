@@ -1,98 +1,146 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
-  <title>Вход — Tickets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" th:href="@{/css/style.css?v=3}">
+  <title>Вход — Справочная система театра</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
   <style>
-    .auth-wrapper {
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: 'Arial Black', sans-serif;
+      background-color: #ffe5b9;
+    }
+
+    /* Фон с картинкой театра */
+    .bgimg {
+      background-image: url("/images/theatre.jpg"); /* путь к вашей картинке */
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      height: 100vh;
       display: flex;
-      align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+      align-items: center;
+      position: relative;
     }
+
+    /* Полупрозрачная карточка входа */
     .auth-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 20px;
-      padding: 2rem 2.5rem;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-      max-width: 380px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(0,0,0,0.2);
+      border-radius: 15px;
+      padding: 2rem 3rem;
+      max-width: 400px;
       width: 100%;
-      backdrop-filter: blur(25px);
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
     }
+
     .auth-card h1 {
-      font-size: 1.6rem;
-      margin-bottom: .5rem;
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      color: white;
+      text-shadow: 1px 1px 5px rgba(0,0,0,0.7);
     }
+
     .auth-card p {
-      color: #94a3b8;
+      color: white;
       margin-bottom: 1.5rem;
+      font-weight: bold;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
     }
+
     .auth-card input {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 8px;
       width: 100%;
       padding: .7rem .8rem;
-      color: white;
-      font-size: .9rem;
+      color: #321b0c;
+      font-size: .95rem;
       margin-bottom: 1rem;
-      transition: .2s;
     }
+
     .auth-card input:focus {
       outline: none;
-      border-color: #38bdf8;
-      background: rgba(255,255,255,0.1);
+      border-color: #321b0c;
+      background: rgba(255,255,255,0.3);
     }
+
     .auth-card button {
-      background: linear-gradient(120deg, #0ea5e9, #38bdf8);
-      border: none;
+      background-color: #321b0c;
       color: white;
-      border-radius: 999px;
-      padding: .7rem;
-      font-size: .9rem;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem;
+      font-size: 1rem;
       width: 100%;
       cursor: pointer;
-      transition: .2s;
+      transition: 0.2s;
     }
+
     .auth-card button:hover {
-      filter: brightness(1.05);
+      background-color: #4b3224;
     }
+
     .auth-card .switch {
       margin-top: 1rem;
-      text-align: center;
-      color: #94a3b8;
-      font-size: .85rem;
+      color: white;
+      font-size: .9rem;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
     }
+
     .auth-card .switch a {
-      color: #38bdf8;
+      color: #ffe5b9;
+      font-weight: bold;
       text-decoration: none;
     }
+
     .auth-card .switch a:hover {
       text-decoration: underline;
     }
+
+    /* Меню сверху */
+    .w3-top .w3-button { font-weight: bold; }
   </style>
 </head>
 <body>
-<div class="auth-wrapper">
-  <div class="auth-card">
-    <h1>Добро пожаловать 👋</h1>
-    <p>Введите свои данные для входа</p>
 
+<!-- Меню -->
+<div class="w3-top">
+  <div class="w3-row w3-padding w3-black">
+    <div class="w3-col s3">
+      <a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a>
+    </div>
+    <div class="w3-col s3">
+      <a th:href="@{/login}" sec:authorize="isAnonymous()" class="w3-button w3-block w3-black">Вход</a>
+    </div>
+    <div class="w3-col s3">
+      <a th:href="@{/register}" sec:authorize="isAnonymous()" class="w3-button w3-block w3-black">Регистрация</a>
+    </div>
+  </div>
+</div>
+
+<!-- Фон с картинкой -->
+<div class="bgimg">
+  <div class="auth-card">
+    <h1>Вход 👋</h1>
+    <p>Введите свои данные</p>
     <form th:action="@{/login}" method="post">
       <input id="username" name="username" placeholder="Логин" required>
       <input id="password" name="password" type="password" placeholder="Пароль" required>
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
       <button type="submit">Войти</button>
     </form>
-
     <div class="switch">
       Нет аккаунта? <a th:href="@{/register}">Создать</a>
     </div>
   </div>
 </div>
+
 </body>
 </html>
