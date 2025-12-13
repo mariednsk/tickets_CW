@@ -62,6 +62,10 @@
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             </form>
         </div>
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <a th:href="@{/tickets}" class="w3-button w3-block w3-black">Мои билеты</a>
+        </div>
+
 
     </div>
 </div>
@@ -71,7 +75,7 @@
     <div class="w3-display-middle w3-center">
         <div class="header-text">Справочная<br>система театра</div>
         <br>
-        <a th:href="@{/tickets}" class="btn-tickets w3-button w3-large">Перейти к билетам</a>
+        <a th:href="@{/performances}" class="btn-tickets w3-button w3-large">Перейти к афише</a>
     </div>
 </header>
 
