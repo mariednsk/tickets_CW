@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${p.title} + ' — Афиша'">Афиша</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <style>
+        body { background:#f5f0eb; font-family: "Arial", sans-serif; color:#321b0c; margin:0; }
+        .topbar { position: sticky; top:0; z-index:50; }
+        .wrap { max-width:900px; margin:90px auto; padding:16px; }
+        .poster { width:100%; height:420px; object-fit:cover; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.12); filter: brightness(.5) blur(.3px); }
+        .meta { margin-top:14px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+        .title { font-size:28px; font-weight:700; color:#321b0c; margin:8px 0; }
+        .desc { background:white; padding:14px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+        .buy { background:#321b0c; color:white; padding:12px 18px; border-radius:8px; text-decoration:none; }
+    </style>
+</head>
+<body>
+<div class="w3-top topbar">
+    <div class="w3-row w3-padding w3-black">
+        <div class="w3-col s3"><a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a></div>
+        <div class="w3-col s3" sec:authorize="isAnonymous()">
+            <a th:href="@{/login}">Вход</a>
+
+        </div>
+        <div class="w3-col s3" sec:authorize="isAnonymous()"><a th:href="@{/register}" class="w3-button w3-block w3-black">Регистрация</a></div>
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <div style="display:flex;">
+                <a th:href="@{/mytickets}" class="w3-button w3-block w3-black" style="flex:1">Мои билеты</a>
+                <form th:action="@{/logout}" method="post" style="margin:0">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="w3-button w3-black" style="border-left:1px solid rgba(255,255,255,0.06)">Выйти</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="wrap">
+    <style>
+        .detail-img {
+            width: 600px;
+            max-width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+            margin: 0 auto 20px auto;
+        }
+
+        .buy-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #321b0c;
+        }
+
+        .secondary-buy {
+            background: #8b6b57;
+        }
+
+    </style>
+
+    <img class="detail-img" th:src="@{'/images/' + ${p.image}}">
+
+
+    <div class="meta">
+        <div>
+            <div class="title" th:text="${p.title}">Название</div>
+            <div class="card-meta" th:text="${p.genre + ' · ' + p.date + ' ' + p.time}"></div>
+        </div>
+        <div class="buy-box">
+            <div class="price" th:text="${p.price} + ' RUB'">1200 RUB</div>
+
+            <a th:href="@{'/performances/' + ${p.id} + '/buy'}"
+               sec:authorize="isAuthenticated()"
+               class="buy"
+               onclick="alert('Выберите места — позже')">
+                Купить билет
+            </a>
+
+            <a th:href="@{/login(redirect='/performances/' + ${p.id} + '/buy')}"
+               sec:authorize="isAnonymous()"
+               class="buy secondary-buy">
+                Вход для покупки
+            </a>
+
+        </div>
+
+    </div>
+
+    <div style="margin-top:16px" class="desc" th:text="${p.description}">Описание спектакля...</div>
+
+    <div style="margin-top:20px">
+        <a th:href="@{/performances}" class="btn secondary">← Назад к афише</a>
+    </div>
+</div>
+
+</body>
+</html>
