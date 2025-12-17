@@ -8,15 +8,27 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import com.example.tickets.model.AppUser;
+import com.example.tickets.model.Seat;
+import com.example.tickets.repository.SeatRepository;
+import com.example.tickets.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+
 
 @Controller
 @RequestMapping("/tickets")
 public class TicketController {
 
     private final TicketRepository ticketRepository;
+    private final SeatRepository seatRepository;
+    private final UserRepository userRepository;
 
-    public TicketController(TicketRepository ticketRepository) {
+    public TicketController(TicketRepository ticketRepository,
+                            SeatRepository seatRepository,
+                            UserRepository userRepository) {
         this.ticketRepository = ticketRepository;
+        this.seatRepository = seatRepository;
+        this.userRepository = userRepository;
     }
 
     /** Список билетов + форма добавления (форма видна только ADMIN в шаблоне) */
@@ -80,66 +92,38 @@ public class TicketController {
         ticketRepository.deleteById(id);
         return "redirect:/tickets";
     }
+
+    @PostMapping("/cancel/{id}")
+    public String cancel(@PathVariable Long id, Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) return "redirect:/login";
+
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Билет не найден: " + id));
+
+        AppUser currentUser = userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        // отменять может только владелец или админ
+        if (!isAdmin && (ticket.getUser() == null || !ticket.getUser().getId().equals(currentUser.getId()))) {
+            return "redirect:/profile?forbidden#tickets";
+        }
+
+        Seat seat = ticket.getSeat();
+        if (seat != null) {
+            seat.setOccupied(false);
+            seatRepository.save(seat);
+        }
+
+        ticketRepository.delete(ticket);
+
+        return "redirect:/profile?canceled#tickets";
+    }
+
 }
 
 
 
 
-//package com.example.tickets.controller;
-//
-//import com.example.tickets.model.Ticket;
-//import com.example.tickets.repository.TicketRepository;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.ui.Model;
-//import org.springframework.validation.BindingResult;
-//import org.springframework.web.bind.annotation.*;
-//
-//@Controller
-//@RequestMapping("/tickets")
-//public class TicketController {
-//
-//    private final TicketRepository ticketRepository;
-//
-//    public TicketController(TicketRepository ticketRepository) {
-//        this.ticketRepository = ticketRepository;
-//    }
-//
-//    @GetMapping
-//    public String listTickets(Model model) {
-//        model.addAttribute("tickets", ticketRepository.findAll());
-//        model.addAttribute("ticket", new Ticket());
-//        return "tickets";
-//    }
-//
-//    @PostMapping("/add")
-//    public String addTicket(@ModelAttribute Ticket ticket, BindingResult bindingResult, Model model) {
-//        if (bindingResult.hasErrors()) {
-//            model.addAttribute("tickets", ticketRepository.findAll());
-//            return "tickets";
-//        }
-//        ticketRepository.save(ticket);
-//        return "redirect:/tickets";
-//    }
-//
-//    @PostMapping("/delete/{id}")
-//    public String deleteTicket(@PathVariable Long id) {
-//        ticketRepository.deleteById(id);
-//        return "redirect:/tickets";
-//    }
-//
-//    @GetMapping("/edit/{id}")
-//    public String editTicketForm(@PathVariable Long id, Model model) {
-//        model.addAttribute("ticket", ticketRepository.findById(id).orElseThrow());
-//        return "edit_ticket";
-//    }
-//
-//    @PostMapping("/edit/{id}")
-//    public String saveEditedTicket(@PathVariable Long id, @ModelAttribute Ticket ticket, BindingResult bindingResult) {
-//        if (bindingResult.hasErrors()) {
-//            return "edit_ticket";
-//        }
-//        ticket.setId(id);
-//        ticketRepository.save(ticket);
-//        return "redirect:/tickets";
-//    }
-//}

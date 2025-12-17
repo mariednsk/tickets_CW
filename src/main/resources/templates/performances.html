@@ -20,8 +20,6 @@
             object-fit: cover;
             display: block;
         }
-
-
         .card-content { padding:14px; }
         .card-title { font-weight:700; margin:0 0 6px; font-size:18px; color:#321b0c; }
         .card-meta { font-size:13px; color:#6b5b50; margin-bottom:8px; }
@@ -31,25 +29,26 @@
         .pagination { display:flex; gap:8px; justify-content:center; margin-top:18px; }
         .page-btn { padding:6px 10px; border-radius:6px; border:1px solid rgba(0,0,0,0.08); background:white; cursor:pointer; }
         .page-btn.active { background:#321b0c; color:white; }
-
         /* адаптив */
         @media (max-width:600px){ .thumb {height:140px} }
     </style>
 </head>
 <body>
-
 <!-- Шапка: главная, вход/рег/мои билеты/выйти -->
 <div class="w3-top topbar">
     <div class="w3-row w3-padding w3-black">
         <div class="w3-col s3"><a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a></div>
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" class="w3-button w3-block w3-black">
+                👤 <span sec:authentication="name"></span>
+            </a>
+        </div>
         <div class="w3-col s3" sec:authorize="isAnonymous()">
             <a th:href="@{/login}">Вход</a>
-
         </div>
         <div class="w3-col s3" sec:authorize="isAnonymous()"><a th:href="@{/register}" class="w3-button w3-block w3-black">Регистрация</a></div>
         <div class="w3-col s3" sec:authorize="isAuthenticated()">
             <div style="display:flex;">
-                <a th:href="@{/mytickets}" class="w3-button w3-block w3-black" style="flex:1">Мои билеты</a>
                 <form th:action="@{/logout}" method="post" style="margin:0">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <button class="w3-button w3-black" style="border-left:1px solid rgba(255,255,255,0.06)">Выйти</button>
@@ -58,98 +57,182 @@
         </div>
     </div>
 </div>
-
 <div class="container">
     <h1>Афиша спектаклей</h1>
-
     <div class="filters">
         <select id="genre" class="filter-select">
             <option value="">Все жанры</option>
             <option th:each="g : ${genres}" th:text="${g}" th:value="${g}"></option>
         </select>
-
+        <input id="actor" class="filter-input" placeholder="Поиск по актёру...">
         <input id="search" class="filter-input" placeholder="Поиск по названию...">
         <button id="btnClear" class="filter-input">Сбросить</button>
     </div>
-
     <div id="grid" class="grid">
         <!-- карточки подгружаются JS -->
     </div>
-
     <div class="pagination" id="pagination"></div>
 </div>
-
 <script>
+    function readStateFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        page = parseInt(params.get('page') || '0', 10) || 0;
+        genreSelect.value = params.get('genre') || '';
+        searchInput.value = params.get('search') || '';
+
+    }
+
+    function writeStateToUrl() {
+        const params = new URLSearchParams();
+        params.set('page', String(page));
+        if (genreSelect.value) params.set('genre', genreSelect.value);
+        if (searchInput.value) params.set('search', searchInput.value);
+        history.replaceState(null, '', `/performances?${params.toString()}`);
+    }
+
+
     const grid = document.getElementById('grid');
     const pagination = document.getElementById('pagination');
     const genreSelect = document.getElementById('genre');
     const searchInput = document.getElementById('search');
     const clearBtn = document.getElementById('btnClear');
+    const actorInput = document.getElementById('actor');
 
     let page = 0, size = 3, totalPages = 0;
 
     async function load() {
-        const genre = encodeURIComponent(genreSelect.value || "");
-        const search = encodeURIComponent(searchInput.value || "");
-
-        const resp = await fetch(`/api/performances?page=${page}&size=${size}&genre=${genre}&search=${search}`);
+        const actor = actorInput.value || '';
+        const genre = genreSelect.value || '';
+        const search = searchInput.value || '';
+        const resp = await fetch(`/api/performances?page=${page}&size=${size}&genre=${encodeURIComponent(genre)}&search=${encodeURIComponent(search)}&actor=${encodeURIComponent(actor)}`);
         if (!resp.ok) {
-            grid.innerHTML = "<p>Не удалось загрузить афишу.</p>";
+            grid.innerHTML = "<p style='text-align:center;color:red;'>Не удалось загрузить афишу.</p>";
+            pagination.innerHTML = '';
             return;
         }
-
         const data = await resp.json();
         const items = data.content || [];
         totalPages = data.totalPages || 0;
 
+        if (totalPages === 0) {
+            page = 0;
+            writeStateToUrl();
+        }
+
+        if (totalPages > 0 && page >= totalPages) {
+            page = totalPages - 1;
+            writeStateToUrl();
+            return load(); // 🔥 заново загрузить уже правильную страницу
+        }
+
+        const detailsUrl = (id) =>
+            `/performances/${id}?page=${page}&genre=${encodeURIComponent(genre)}&search=${encodeURIComponent(search)}`;
+
         grid.innerHTML = items.map(p => `
-        <div class="card">
-            <a href="/performances/${p.id}">
-                <img class="thumb" src="/images/${p.image}">
-            </a>
-            <div class="card-content">
-                <div class="card-title">${escapeHtml(p.title)}</div>
-                <div class="card-meta">${p.genre} · ${p.date} ${p.time}</div>
-                <a class="btn" href="/performances/${p.id}">Подробнее</a>
-            </div>
-        </div>
-    `).join('');
+<div class="card">
+    <a href="${detailsUrl(p.id)}">
+      <img class="thumb" src="/uploads/${p.image}">
+    </a>
+    <div class="card-content">
+      <div class="card-title">${p.title}</div>
+      <div class="card-meta">${p.genre} · ${p.date} ${p.time}</div>
+    </div>
+    <div class="card-actions">
+      <a class="btn" href="${detailsUrl(p.id)}">Подробнее</a>
+      <button type="button" class="favorite-btn" data-id="${p.id}">
+        <span class="heart">♡</span>
+      </button>
+    </div>
+  </div>
+`).join('');
+
+        // Обновляем сердечки
+        document.querySelectorAll('.favorite-btn').forEach(btn => {
+            const id = btn.dataset.id;
+
+            // Текущий статус
+            fetch(`/api/performances/${id}/favorite`)
+                .then(r => r.json())
+                .then(isFav => {
+                    btn.querySelector('.heart').textContent = isFav ? '❤️' : '♡';
+                })
+                .catch(() => {});
+
+            // Клик — с обновлением списка после действия
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault(); // на всякий
+
+                const authResp = await fetch('/api/user/authenticated');
+                const isAuth = await authResp.json();
+
+                if (!isAuth) {
+                    alert('Сначала войдите в систему, чтобы добавить в избранное!');
+                    return;
+                }
+
+                const heart = btn.querySelector('.heart');
+                const method = heart.textContent === '♡' ? 'POST' : 'DELETE';
+
+                await fetch(`/api/performances/${id}/favorite`, { method: method });
+
+                heart.textContent = method === 'POST' ? '❤️' : '♡';
+            });
+        });
 
         renderPagination();
     }
 
-
-    function renderPagination(){
+    function renderPagination() {
         pagination.innerHTML = '';
-        for(let i=0;i<totalPages;i++){
+        if (totalPages <= 1) return;
+
+        for (let i = 0; i < totalPages; i++) {
             const b = document.createElement('button');
-            b.className = 'page-btn' + (i===page ? ' active' : '');
-            b.textContent = i+1;
-            b.onclick = ()=> { page = i; load(); };
+            b.className = 'page-btn' + (i === page ? ' active' : '');
+            b.textContent = i + 1;
+            b.onclick = () => {
+                page = i;
+                writeStateToUrl();
+                load();
+            };
             pagination.appendChild(b);
         }
     }
 
-    function buyPlaceholder(e, id){
-        // если не авторизован — Spring Security перенаправит на /login
-        // пока просто показываем заглушку и предотвращаем переход
-        e.preventDefault();
-        alert('Функция выбора мест появится позже. Пока — заглушка.');
-        return false;
-    }
-
-    function escapeHtml(s){ if (!s) return ''; return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-
-    // фильтры
-    genreSelect.addEventListener('change', () => { page = 0; load(); });
-    searchInput.addEventListener('input', () => {
+    // Фильтры
+    genreSelect.addEventListener('change', () => {
         page = 0;
+        writeStateToUrl();   // ✅
         load();
     });
-    clearBtn.addEventListener('click', ()=> { genreSelect.value=''; searchInput.value=''; page=0; load(); });
 
-    // initial
+    searchInput.addEventListener('input', () => {
+        page = 0;
+        writeStateToUrl();   // ✅
+        load();
+    });
+
+    clearBtn.addEventListener('click', () => {
+        genreSelect.value = '';
+        searchInput.value = '';
+        page = 0;
+        writeStateToUrl();   // ✅
+        load();
+    });
+
+    actorInput.addEventListener('input', () => { page = 0; writeStateToUrl(); load(); });
+
+
+
+    readStateFromUrl();
+    writeStateToUrl();
     load();
+
+    window.addEventListener('pageshow', () => {
+        readStateFromUrl();
+        load();
+    });
+
 </script>
 </body>
 </html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить актера</title>
+</head>
+<body>
+
+<h1>Добавить актера</h1>
+
+<form th:action="@{/admin/actors/add}" th:object="${actor}" method="post" enctype="multipart/form-data">
+
+    <div><label>ФИО</label><input type="text" th:field="*{fullName}" required></div>
+    <div><label>Биография</label><textarea th:field="*{bio}" required></textarea></div>
+    <div><label>Фото</label><input type="file" name="photoFile" accept="image/*" required></div>
+
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <button type="submit">Добавить</button>
+</form>
+
+<hr>
+
+<h3>Список актеров</h3>
+<div th:each="a : ${actors}" style="border:1px solid #ccc;padding:10px;margin:10px 0;">
+    <b th:text="${a.fullName}"></b>
+    <div th:text="${a.bio}"></div>
+
+    <img th:if="${a.photo != null}" th:src="@{'/uploads/' + ${a.photo}}" style="max-width:180px;display:block;margin:8px 0;">
+
+    <a th:href="@{'/admin/actors/edit/' + ${a.id}}">Редактировать</a>
+
+    <form th:action="@{'/admin/actors/delete/' + ${a.id}}" method="post" style="display:inline;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button type="submit" onclick="return confirm('Удалить актера?')">Удалить</button>
+    </form>
+</div>
+
+</body>
+</html>

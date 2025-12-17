@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 @EnableMethodSecurity
@@ -44,35 +45,59 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationSuccessHandler successHandler() {
+        return (request, response, authentication) -> {
+            String redirectTo = request.getParameter("redirectTo");
+
+            // Если есть параметр redirectTo, перенаправляем на нужную страницу
+            if (redirectTo != null && !redirectTo.isBlank()) {
+                response.sendRedirect(redirectTo);
+            } else {
+                // Если админ — редиректим на панель админа
+                if (authentication.getAuthorities().stream()
+                        .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
+                    response.sendRedirect("/admin/dashboard");  // Админская панель
+                } else {
+                    // Обычный пользователь перенаправляется на главную
+                    response.sendRedirect("/");
+                }
+            }
+        };
+    }
+
+
+
+    @Bean
     @Order(2)
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
-
         http
-                //.securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
-                        // ПУБЛИЧНЫЕ страницы
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+                        // Публичные страницы
                         .requestMatchers("/", "/login", "/register").permitAll()
                         .requestMatchers("/performances").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/performances/*").permitAll()
-                        .requestMatchers("/performances/*/buy").authenticated()
-
-                        // Доступ к билетам
-                        .requestMatchers(HttpMethod.GET, "/tickets", "/tickets/").hasAnyRole("USER","ADMIN")
+                        .requestMatchers("/performances/**").permitAll()  // подробнее и изображения — публичные
+                        // Страница покупки билетов — только для авторизованных
+                        .requestMatchers("/performances/*/buy").permitAll()
+                        // Управление билетами
+                        .requestMatchers(HttpMethod.GET, "/tickets", "/tickets/").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/tickets/edit/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/tickets/add").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/tickets/edit/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/tickets/delete/**").hasRole("ADMIN")
 
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
+
+
                 .formLogin(login -> login
                         .loginPage("/login")
+                        .successHandler(successHandler())
                         .permitAll()
                 )
-
-
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
@@ -83,9 +108,9 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                 );
 
+
         return http.build();
     }
 
 }
-
 

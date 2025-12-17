@@ -1,13 +1,275 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Выбор билетов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${p.title} + ' — Покупка билетов'">Покупка билетов</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <style>
+        body { background:#f5f0eb; font-family: Arial, sans-serif; color:#321b0c; margin:0; }
+        .topbar { position: sticky; top:0; z-index:50; }
+        .container { max-width:1100px; margin:100px auto 60px; padding:0 16px; text-align:center; }
+        h1 { color:#321b0c; margin-bottom:10px; }
+        .performance-info { margin-bottom:30px; font-size:18px; }
+        .screen { background:#321b0c; color:white; padding:10px; margin:20px auto; width:80%; border-radius:10px; font-weight:bold; }
+        .seating { display:flex; justify-content:center; margin:30px 0; }
+        .rows { display:flex; flex-direction:column; gap:15px; align-items:center; }
+        .row { display:flex; gap:10px; align-items:center; }
+        .seat { width:40px; height:40px; background:#ccc; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold; cursor:pointer; transition:0.2s; }
+        .seat.available:hover { background:#a0a0a0; }
+        .seat.selected { background:#56aa45; color:white; }
+        .seat.aisle { background:transparent; cursor:default; width:60px; } /* проход */
+        .legend { margin:20px 0; display:flex; justify-content:center; gap:30px; }
+        .legend-item { display:flex; align-items:center; gap:10px; }
+        .selected-info { margin:30px 0; padding:20px; background:white; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.1); }
+        .buy-btn { background:#321b0c; color:white; padding:15px 30px; font-size:18px; border:none; border-radius:8px; cursor:pointer; }
+        .buy-btn:hover { background:#4b3224; }
+        .back-link { margin-top:20px; display:inline-block; color:#321b0c; text-decoration:none; }
+        .back-link:hover { text-decoration:underline; }
+        .seat.occupied {
+            background: #ff4d4d !important;
+            color: white;
+            cursor: not-allowed;
+        }
+        .seat.occupied:hover {
+            background: #ff4d4d !important;
+        }
+    </style>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
-<h1 th:text="${p.title}">Спектакль</h1>
-<p>Страница выбора мест (пока заглушка)</p>
 
-<a th:href="@{/performances}">← Назад к афише</a>
+<!-- Шапка -->
+<div class="w3-top topbar">
+    <div class="w3-row w3-padding w3-black">
+        <div class="w3-col s3"><a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a></div>
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" class="w3-button w3-block w3-black">Личный кабинет</a>
+        </div>
+        <div class="w3-col s3" sec:authorize="isAnonymous()"><a th:href="@{/login}" class="w3-button w3-block w3-black">Вход</a></div>
+        <div class="w3-col s3" sec:authorize="isAnonymous()"><a th:href="@{/register}" class="w3-button w3-block w3-black">Регистрация</a></div>
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <a th:href="@{/tickets}" class="w3-button w3-block w3-black">Мои билеты</a>
+            <form th:action="@{/logout}" method="post" style="display:inline;margin-left:5px;">
+                <button class="w3-button w3-block w3-black" style="padding:8px;">Выйти</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h1 th:text="${p.title}">Спектакль</h1>
+    <div class="performance-info">
+        <span th:text="${p.date + ' ' + p.time}"></span> |
+        Цена билета: <strong th:text="${p.price} + ' ₽'"></strong>
+    </div>
+
+    <div class="screen">СЦЕНА</div>
+
+    <div class="seating">
+        <div class="rows" id="seatMap"></div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="seat available"></div> Свободно</div>
+        <div class="legend-item"><div class="seat selected"></div> Выбрано вами</div>
+    </div>
+
+    <div class="selected-info">
+        <h3>Выбранные места: <span id="selectedCount">0</span></h3>
+        <ul id="selectedList" style="list-style:none; padding:0;"></ul>
+        <h3>Итого: <span id="totalPrice">0</span> ₽</h3>
+        <button class="buy-btn" id="buyButton">Купить выбранные билеты</button>
+    </div>
+
+    <a th:href="@{/performances}" class="back-link">← Назад к афише</a>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const performance = /*[[${p}]]*/ null;
+    const price = performance.price;
+    const seatsData = /*[[${seats}]]*/ [];  // Список мест из БД
+
+    const rows = ['A','B','C','D','E','F','G','H','I','J'];
+    const seatsPerRow = 12;
+    const aisleStart = 5; // проход с 5 по 8 место
+
+    const seatMap = document.getElementById('seatMap');
+    const selectedList = document.getElementById('selectedList');
+    const selectedCount = document.getElementById('selectedCount');
+    const totalPriceEl = document.getElementById('totalPrice');
+    const buyButton = document.getElementById('buyButton');
+
+    let selectedSeats = [];
+
+    // Генерация схемы зала
+    rows.forEach(rowLabel => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'row';
+
+        // Номер ряда слева
+        const rowLabelEl = document.createElement('div');
+        rowLabelEl.textContent = rowLabel;
+        rowLabelEl.style.width = '30px';
+        rowLabelEl.style.fontWeight = 'bold';
+        rowDiv.appendChild(rowLabelEl);
+
+        for (let seatNum = 1; seatNum <= seatsPerRow; seatNum++) {
+            if (seatNum >= aisleStart && seatNum <= aisleStart + 3) {
+                // проход
+                const aisle = document.createElement('div');
+                aisle.className = 'seat aisle';
+                rowDiv.appendChild(aisle);
+            } else {
+                const seat = document.createElement('div');
+                seat.className = 'seat';
+                seat.textContent = seatNum;
+                seat.dataset.row = rowLabel;
+                seat.dataset.num = seatNum;
+
+                // Проверяем, занято ли место по данным из БД
+                const occupiedSeat = seatsData.find(s =>
+                    s.rowLabel === rowLabel && s.seatNumber === seatNum && s.occupied
+                );
+
+                if (occupiedSeat) {
+                    seat.classList.add('occupied');
+                    seat.style.pointerEvents = 'none'; // нельзя кликать
+                } else {
+                    seat.classList.add('available');
+                    seat.addEventListener('click', () => toggleSeat(seat));
+                }
+
+                rowDiv.appendChild(seat);
+            }
+        }
+
+        // Номер ряда справа
+        const rowLabelEl2 = rowLabelEl.cloneNode(true);
+        rowDiv.appendChild(rowLabelEl2);
+
+        seatMap.appendChild(rowDiv);
+    });
+
+    // Добавляем пункт в легенду "Занято"
+    const legend = document.querySelector('.legend');
+    const occupiedLegend = document.createElement('div');
+    occupiedLegend.className = 'legend-item';
+    occupiedLegend.innerHTML = `<div class="seat occupied"></div> Занято`;
+    legend.appendChild(occupiedLegend);
+
+    // Функция выбора/снятия места
+    function toggleSeat(seatEl) {
+        const row = seatEl.dataset.row;
+        const num = parseInt(seatEl.dataset.num);
+        const id = row + num;
+
+        if (selectedSeats.includes(id)) {
+            selectedSeats = selectedSeats.filter(s => s !== id);
+            seatEl.classList.remove('selected');
+        } else {
+            selectedSeats.push(id);
+            seatEl.classList.add('selected');
+        }
+
+        updateSelectedInfo();
+    }
+
+    function updateSelectedInfo() {
+        selectedCount.textContent = selectedSeats.length;
+        totalPriceEl.textContent = (selectedSeats.length * price).toLocaleString() + ' ₽';
+
+        selectedList.innerHTML = '';
+        selectedSeats.forEach(id => {
+            const li = document.createElement('li');
+            li.textContent = 'Ряд ' + id[0] + ', место ' + id.slice(1);
+            selectedList.appendChild(li);
+        });
+    }
+
+    // Обработчик кнопки "Купить"
+    buyButton.addEventListener('click', () => {
+        if (selectedSeats.length === 0) {
+            alert('Выберите хотя бы одно место!');
+            return;
+        }
+
+        const data = selectedSeats.map(id => {
+            const row = id.charAt(0);
+            const numStr = id.substring(1);
+            const num = parseInt(numStr, 10);
+            if (isNaN(num)) {
+                console.error("Ошибка парсинга номера места: " + id);
+            }
+            return { row: row, num: num };
+        });
+
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+
+        fetch(`/api/performances/${performance.id}/buy`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+            body: JSON.stringify(data)
+        })
+            .then(resp => {
+                if (resp.ok) {
+                    return resp.text().then(text => {
+                        alert(text || 'Билеты успешно куплены!');
+                        window.location.href = '/profile#tickets';
+                    });
+                } else if (resp.status === 401) {
+                    // Не авторизован — сохраняем выбор
+                    localStorage.setItem('pendingPurchase', JSON.stringify({
+                        performanceId: performance.id,
+                        seats: data
+                    }));
+                    const buyUrl = `/performances/${performance.id}/buy`;
+                    window.location.href = `/login?redirectTo=${encodeURIComponent(buyUrl)}`;
+                } else {
+                    return resp.text().then(text => alert('Ошибка: ' + text));
+                }
+            })
+            .catch(err => {
+                alert('Ошибка сети: ' + err.message);
+            });
+    });
+    // Автоматическая покупка после логина
+    window.addEventListener('load', () => {
+        const pending = localStorage.getItem('pendingPurchase');
+        if (pending) {
+            const { performanceId, seats } = JSON.parse(pending);
+            localStorage.removeItem('pendingPurchase'); // очищаем
+
+            // Проверяем, что мы на правильной странице
+            if (performance.id === performanceId) {
+                fetch(`/api/performances/${performanceId}/buy`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [document.querySelector('meta[name="_csrf_header"]').content]:
+                        document.querySelector('meta[name="_csrf"]').content
+                    },
+                    body: JSON.stringify(seats)
+                })
+                    .then(resp => {
+                        if (resp.ok) {
+                            alert('Билеты успешно куплены!');
+                            window.location.href = '/profile#tickets';
+                        } else {
+                            resp.text().then(text => alert('Ошибка при покупке: ' + text));
+                        }
+                    })
+                    .catch(err => alert('Ошибка: ' + err.message));
+            }
+        }
+    });
+    /*]]>*/
+</script>
 </body>
 </html>

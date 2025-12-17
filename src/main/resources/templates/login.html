@@ -131,11 +131,16 @@
     <h1>Вход 👋</h1>
     <p>Введите свои данные</p>
     <form th:action="@{/login}" method="post">
-      <input name="username">
-      <input name="password" type="password">
+      <input type="text" name="username" placeholder="Логин" required>
+      <input type="password" name="password" placeholder="Пароль" required>
+
+      <!-- Скрытое поле с redirectTo, если оно есть в URL -->
+      <input type="hidden" name="redirectTo" th:value="${param.redirectTo[0]}" th:if="${param.redirectTo != null}"/>
+
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
       <button type="submit">Войти</button>
     </form>
+
     <div class="switch">
       Нет аккаунта? <a th:href="@{/register}">Создать</a>
     </div>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Административная панель</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #4b3224; /* темно-коричневый фон */
+            color: #f5f0eb; /* бежевый текст */
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: #3e2a1d; /* темный оттенок коричневого */
+            color: #f5f0eb;
+            padding: 12px;
+        }
+
+        .topbar a {
+            color: #f5f0eb;
+            font-weight: bold;
+            padding: 12px;
+        }
+
+        .topbar a:hover {
+            background-color: #5a3a2f; /* светлый коричневый */
+            color: white;
+        }
+
+        .container {
+            margin: 40px auto;
+            max-width: 1200px;
+            padding: 16px;
+            background-color: #3e2a1d;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #f5f0eb;
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: #f5f0eb;
+        }
+
+        .button {
+            background-color: #f5f0eb;
+            color: #3e2a1d;
+            padding: 12px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin: 10px;
+            display: inline-block;
+        }
+
+        .button:hover {
+            background-color: #d1b9a0; /* светло-бежевый при наведении */
+        }
+
+        .sidebar {
+            background-color: #321b0c; /* темно-коричневый для сайдбара */
+            color: #f5f0eb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 12px;
+            text-decoration: none;
+            color: #f5f0eb;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .sidebar a:hover {
+            background-color: #5a3a2f;
+        }
+
+        .content {
+            padding: 20px;
+            background-color: #f5f0eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- Шапка -->
+<div class="topbar">
+    <div class="w3-row">
+        <div class="w3-col s3"><a href="/admin/performances" class="w3-button w3-block">Спектакли</a></div>
+        <div class="w3-col s3"><a href="/admin/actors" class="w3-button w3-block">Актеры</a></div>
+        <div class="w3-col s3"><a href="/admin/tickets" class="w3-button w3-block">Билеты</a></div>
+        <div class="w3-col s3"><a href="/logout" class="w3-button w3-block">Выход</a></div>
+    </div>
+</div>
+
+<div class="container">
+    <h1>Административная панель</h1>
+
+    <div class="sidebar">
+        <h3>Управление</h3>
+        <a href="/admin/performances">Добавить спектакль</a>
+        <a href="/admin/actors">Добавить актера</a>
+        <a href="/admin/tickets">Управление билетами</a>
+    </div>
+
+    <div class="content">
+        <h2>Добро пожаловать в административную панель</h2>
+        <p>Здесь вы можете управлять спектаклями, актерами и билетами.</p>
+    </div>
+</div>
+
+</body>
+</html>

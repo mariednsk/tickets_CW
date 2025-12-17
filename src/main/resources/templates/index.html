@@ -50,6 +50,11 @@
         <div class="w3-col s3">
             <a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a>
         </div>
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" class="w3-button w3-block w3-black">
+                👤 <span sec:authentication="name"></span>
+            </a>
+        </div>
         <div class="w3-col s3" sec:authorize="isAnonymous()">
             <a th:href="@{/login}" class="w3-button w3-block w3-black">Вход</a>
         </div>
@@ -62,9 +67,7 @@
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             </form>
         </div>
-        <div class="w3-col s3" sec:authorize="isAuthenticated()">
-            <a th:href="@{/tickets}" class="w3-button w3-block w3-black">Мои билеты</a>
-        </div>
+
 
 
     </div>

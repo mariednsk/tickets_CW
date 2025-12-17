@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Актёры</title>
+</head>
+<body>
+<h1>Актёры</h1>
+
+<form method="get" action="/actors">
+    <input name="q" placeholder="Поиск по имени..." th:value="${q}">
+    <button type="submit">Найти</button>
+</form>
+
+<div th:each="a : ${actors}">
+    <a th:href="@{'/actors/' + ${a.id}}">
+        <img th:if="${a.photo != null}" th:src="@{'/uploads/' + ${a.photo}}">
+        <span th:text="${a.fullName}"></span>
+    </a>
+</div>
+
+</body>
+</html>

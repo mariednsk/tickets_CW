@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${a.fullName}">Актёр</title>
+</head>
+<body>
+
+<h1 th:text="${a.fullName}"></h1>
+<img th:if="${a.photo != null}" th:src="@{'/uploads/' + ${a.photo}}">
+<p th:text="${a.bio}"></p>
+
+<h2>Спектакли</h2>
+<ul>
+    <li th:each="p : ${performances}">
+        <a th:href="@{'/performances/' + ${p.id}}" th:text="${p.title}"></a>
+    </li>
+</ul>
+
+<a href="/actors">← ко всем актёрам</a>
+</body>
+</html>

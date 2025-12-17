@@ -2,11 +2,14 @@ package com.example.tickets.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "ticket")
+@Getter
+@Setter
 public class Ticket {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,54 +22,17 @@ public class Ticket {
     @Size(max = 50, message = "Имя покупателя слишком длинное")
     private String buyerName;
 
-    @NotBlank(message = "Номер места не может быть пустым")
-    @Size(max = 10, message = "Номер места слишком длинный")
-    private String seatNumber;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private AppUser user;
+
+    @ManyToOne
+    @JoinColumn(name = "performance_id")
+    private Performance performance;
+
+    @OneToOne
+    @JoinColumn(name = "seat_id")
+    private Seat seat;  // Связь с местом
 
     public Ticket() {}
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getEventName() { return eventName; }
-    public void setEventName(String eventName) { this.eventName = eventName; }
-
-    public String getBuyerName() { return buyerName; }
-    public void setBuyerName(String buyerName) { this.buyerName = buyerName; }
-
-    public String getSeatNumber() { return seatNumber; }
-    public void setSeatNumber(String seatNumber) { this.seatNumber = seatNumber; }
 }
-
-
-//package com.example.tickets.model;
-//
-//import jakarta.persistence.Entity;
-//import jakarta.persistence.GeneratedValue;
-//import jakarta.persistence.GenerationType;
-//import jakarta.persistence.Id;
-//
-//@Entity
-//public class Ticket {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
-//
-//    private String eventName;
-//    private String buyerName;
-//    private String seatNumber;
-//
-//    public Ticket() {}
-//
-//    public Long getId() { return id; }
-//    public void setId(Long id) { this.id = id; }
-//
-//    public String getEventName() { return eventName; }
-//    public void setEventName(String eventName) { this.eventName = eventName; }
-//
-//    public String getBuyerName() { return buyerName; }
-//    public void setBuyerName(String buyerName) { this.buyerName = buyerName; }
-//
-//    public String getSeatNumber() { return seatNumber; }
-//    public void setSeatNumber(String seatNumber) { this.seatNumber = seatNumber; }
-//}

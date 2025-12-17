@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Личный кабинет</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <style>
+        body { background:#f5f0eb; font-family: Arial, sans-serif; color:#321b0c; margin:0; }
+        .topbar { position: sticky; top:0; z-index:50; }
+        .container { max-width:1100px; margin:100px auto 60px; padding:0 16px; }
+        .card { background:#fff; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.08); padding:16px; margin-bottom:16px; }
+        .title { font-size:28px; font-weight:800; margin:0 0 10px; }
+        .row { display:flex; gap:12px; flex-wrap:wrap; }
+        .field { flex:1; min-width:220px; }
+        label { display:block; font-weight:700; margin-bottom:6px; }
+        input { width:100%; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,.12); }
+        .btn { background:#321b0c; color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; }
+        .btn.secondary { background:transparent; color:#321b0c; border:1px solid #d6c8bd; }
+        .tabs { display:flex; gap:10px; margin-bottom:10px; }
+        .tab { padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,.1); background:#fff; cursor:pointer; }
+        .tab.active { background:#321b0c; color:#fff; }
+        .list { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:12px; }
+        .item { background:#fff; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,.06); overflow:hidden; }
+        .item img { width:100%; height:180px; object-fit:cover; display:block; }
+        .item-body { padding:12px; }
+        .item-title { font-weight:800; margin:0 0 6px; }
+        .muted { color:#6b5b50; font-size:13px; }
+    </style>
+</head>
+<body>
+
+<!-- Шапка -->
+<div class="w3-top topbar">
+    <div class="w3-row w3-padding w3-black">
+        <div class="w3-col s3"><a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a></div>
+
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" class="w3-button w3-block w3-black">
+                👤 <span sec:authentication="name"></span>
+            </a>
+        </div>
+
+        <div class="w3-col s3" sec:authorize="isAnonymous()">
+            <a th:href="@{/login}" class="w3-button w3-block w3-black">Вход</a>
+        </div>
+
+        <div class="w3-col s3" sec:authorize="isAnonymous()">
+            <a th:href="@{/register}" class="w3-button w3-block w3-black">Регистрация</a>
+        </div>
+
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <form th:action="@{/logout}" method="post" style="margin:0">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button class="w3-button w3-block w3-black">Выйти</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="title">Мой профиль</div>
+
+        <div th:if="${param.saved != null}" class="w3-panel w3-pale-green w3-border" style="border-radius:10px;">
+            Профиль сохранён ✅
+        </div>
+
+        <div class="muted" style="margin-bottom:10px;">
+            Логин: <b th:text="${user.username}"></b>
+        </div>
+
+        <form th:action="@{/profile/update}" method="post">
+            <div class="row">
+                <div class="field">
+                    <label>ФИО</label>
+                    <input type="text" name="fullName" th:value="${user.fullName}">
+                </div>
+                <div class="field">
+                    <label>Телефон</label>
+                    <input type="text" name="phone" th:value="${user.phone}">
+                </div>
+                <div class="field">
+                    <label>Почта</label>
+                    <input type="email" name="email" th:value="${user.email}">
+                </div>
+            </div>
+
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div style="margin-top:12px; display:flex; gap:10px;">
+                <button class="btn" type="submit">Сохранить</button>
+                <a class="btn secondary" th:href="@{/performances}">К афише</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" id="tabTickets" type="button">Мои билеты</button>
+        <button class="tab" id="tabFav" type="button">Избранное</button>
+    </div>
+
+    <!-- Билеты -->
+    <div id="panelTickets" class="card">
+        <div class="title" style="font-size:22px;">Мои билеты</div>
+
+        <div th:if="${#lists.isEmpty(tickets)}" class="muted">
+            У вас пока нет купленных билетов.
+        </div>
+
+        <div th:if="${!#lists.isEmpty(tickets)}">
+            <table class="w3-table w3-striped w3-bordered" style="background:white;border-radius:10px;overflow:hidden;">
+                <thead>
+                <tr style="background:#321b0c;color:white;">
+                    <th>Спектакль</th>
+                    <th>Дата</th>
+                    <th>Время</th>
+                    <th>Ряд</th>
+                    <th>Место</th>
+                    <th>Действия</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="t : ${tickets}">
+                    <td th:text="${t.performance.title}"></td>
+                    <td th:text="${t.performance.date}"></td>
+                    <td th:text="${t.performance.time}"></td>
+                    <td th:text="${t.seat.rowLabel}"></td>
+                    <td th:text="${t.seat.seatNumber}"></td>
+                    <td>
+                        <form th:action="@{'/tickets/cancel/' + ${t.id}}" method="post" style="margin:0">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button class="btn secondary" type="submit"
+                                    onclick="return confirm('Отменить бронирование и освободить место?')">
+                                Отменить
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Избранное -->
+    <div id="panelFav" class="card" style="display:none;">
+        <div class="title" style="font-size:22px;">Избранные спектакли</div>
+
+        <div th:if="${#lists.isEmpty(favorites)}" class="muted">
+            Вы ещё ничего не добавили в избранное.
+        </div>
+
+        <div class="list" th:if="${!#lists.isEmpty(favorites)}">
+            <div class="item" th:each="p : ${favorites}">
+                <a th:href="@{'/performances/' + ${p.id}}">
+                    <img th:src="@{'/images/' + ${p.image}}" th:alt="${p.title}">
+                </a>
+                <div class="item-body">
+                    <div class="item-title" th:text="${p.title}"></div>
+                    <div class="muted" th:text="${p.genre + ' · ' + p.date + ' ' + p.time}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const tabTickets = document.getElementById('tabTickets');
+    const tabFav = document.getElementById('tabFav');
+    const panelTickets = document.getElementById('panelTickets');
+    const panelFav = document.getElementById('panelFav');
+
+    tabTickets.onclick = () => {
+        tabTickets.classList.add('active');
+        tabFav.classList.remove('active');
+        panelTickets.style.display = '';
+        panelFav.style.display = 'none';
+    };
+
+    tabFav.onclick = () => {
+        tabFav.classList.add('active');
+        tabTickets.classList.remove('active');
+        panelFav.style.display = '';
+        panelTickets.style.display = 'none';
+    };
+</script>
+
+</body>
+</html>
