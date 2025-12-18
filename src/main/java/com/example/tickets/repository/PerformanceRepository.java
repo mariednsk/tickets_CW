@@ -7,7 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface PerformanceRepository extends JpaRepository<Performance, Long> {
+
+    List<Performance> findByTitleContainingIgnoreCase(String title);
 
     Page<Performance> findByGenreContainingIgnoreCase(String genre, Pageable pageable);
 
@@ -18,6 +22,7 @@ public interface PerformanceRepository extends JpaRepository<Performance, Long> 
             String title,
             Pageable pageable
     );
+
 
     @Query("""
     select distinct p

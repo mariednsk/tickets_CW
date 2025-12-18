@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -21,7 +22,7 @@ public class AdminActorController {
         this.actorRepo = actorRepo;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public String adminActors(Model model) {
         model.addAttribute("actors", actorRepo.findAll());
         model.addAttribute("actor", new Actor()); // Для формы добавления
@@ -42,6 +43,22 @@ public class AdminActorController {
         Actor actor = actorRepo.findById(id).orElseThrow();
         model.addAttribute("actor", actor);
         return "admin_actor_edit";
+    }
+
+    @GetMapping
+    public String list(@RequestParam(required = false) String search, Model model) {
+        List<Actor> actors;
+        if (search != null && !search.isEmpty()) {
+            actors = actorRepo.findByFullNameContainingIgnoreCase(search);
+        } else {
+            actors = actorRepo.findAll();
+        }
+        model.addAttribute("actors", actors);
+        model.addAttribute("search", search);
+
+        model.addAttribute("actor", new Actor());
+
+        return "admin_actors";
     }
 
     @PostMapping("/edit/{id}")

@@ -4,42 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Справочная система театра</title>
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
     <style>
-        body, html {
-            height: 100%;
-            font-family: 'Arial Black',sans-serif;
-            font-style: normal;
-            background-color: #f5f5f5;
-        }
-
         .bgimg {
+            background-image: url("/images/theatre.jpg");
             background-position: center;
             background-size: cover;
-            background-image: url("/images/theatre.jpg"); /* путь к вашей картинке театра */
-            min-height: 500px; /* выше по высоте */
+            background-repeat: no-repeat;
+            min-height: 600px;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bgimg::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5); /* тёмный оверлей для текста */
         }
 
         .header-text {
+            position: relative;
             color: white;
             font-size: 60px;
-            text-shadow: 1px 1px 5px rgba(0,0,0,0.7);
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+            margin: 0;
+            line-height: 1.2;
+            text-align: center;
         }
 
         .btn-tickets {
+            position: relative;
+            display: inline-block;
             background-color: #321b0c;
             color: white;
-            padding: 15px 30px;
-            font-size: 20px;
+            padding: 18px 40px;
+            font-size: 22px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             text-decoration: none;
+            margin-top: 30px;
+            transition: background 0.3s;
         }
-        .btn-tickets:hover { background-color: #321b0c; }
 
-        footer { padding: 20px; }
+        .btn-tickets:hover {
+            background-color: #4b3224;
+        }
+
+        @media (max-width: 768px) {
+            .header-text {
+                font-size: 40px;
+            }
+            .btn-tickets {
+                font-size: 18px;
+                padding: 14px 30px;
+            }
+        }
     </style>
 </head>
 <body>

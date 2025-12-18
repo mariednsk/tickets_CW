@@ -3,115 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Редактировать актера — Административная панель</title>
+  <title>Редактировать артиста — Админ-панель</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
   <style>
-    body, html {
-      font-family: Arial, sans-serif;
-      background-color: #4b3224; /* темно-коричневый */
-      color: #f5f0eb; /* бежевый */
-      margin: 0;
-      padding: 0;
-    }
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      background-color: #3e2a1d;
-      color: #f5f0eb;
-    }
-
-    .topbar a {
-      color: #f5f0eb;
-      font-weight: bold;
-      padding: 12px;
-      text-decoration: none;
-    }
-
-    .topbar a:hover {
-      background-color: #5a3a2f;
-    }
-
-    .container {
+    .form-card {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      max-width: 800px;
       margin: 40px auto;
-      max-width: 1000px;
-      padding: 16px;
-      background-color: #3e2a1d;
-      border-radius: 8px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
-
-    h1 {
-      color: #f5f0eb;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group input, .form-group textarea {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      margin-top: 5px;
-      border-radius: 8px;
-      border: 1px solid #3e2a1d;
-    }
-
-    .form-group input[type="file"] {
-      font-size: 16px;
-    }
-
-    .form-group input[type="submit"] {
-      background-color: #3e2a1d;
-      color: #f5f0eb;
-      cursor: pointer;
-      font-size: 18px;
-    }
-
-    .form-group input[type="submit"]:hover {
-      background-color: #5a3a2f;
+    .current-photo {
+      max-width: 300px;
+      border-radius: 10px;
+      margin: 20px 0;
     }
   </style>
 </head>
 <body>
 
-<!-- Шапка -->
 <div class="topbar">
   <div class="w3-row w3-padding">
-    <div class="w3-col s3"><a href="/static" class="w3-button w3-block">Главная</a></div>
-    <div class="w3-col s3"><a href="/admin/performances" class="w3-button w3-block">Спектакли</a></div>
-    <div class="w3-col s3"><a href="/admin/actors" class="w3-button w3-block">Актеры</a></div>
-    <div class="w3-col s3"><a href="/logout" class="w3-button w3-block">Выход</a></div>
+    <div class="w3-col s2 m2 l2">
+      <a th:href="@{/admin/dashboard}" class="w3-button w3-block">Панель</a>
+    </div>
+    <div class="w3-col s2 m2 l2">
+      <a th:href="@{/admin/performances}" class="w3-button w3-block">Спектакли</a>
+    </div>
+    <div class="w3-col s2 m2 l2">
+      <a th:href="@{/admin/actors}" class="w3-button w3-block">Актёры</a>
+    </div>
+    <div class="w3-col s2 m2 l2">
+      <a th:href="@{/admin/tickets}" class="w3-button w3-block">Билеты</a>
+    </div>
+    <div class="w3-col s2 m2 l2">
+      <form th:action="@{/logout}" method="post" style="margin:0;">
+        <button class="w3-button w3-block" type="submit">Выйти</button>
+      </form>
+    </div>
   </div>
 </div>
 
+
 <div class="container">
-  <h1>Редактировать актера</h1>
-  <form action="/admin/actors/edit" method="POST" enctype="multipart/form-data">
-    <input type="hidden" name="id" th:value="${actor.id}">
-    <div class="form-group">
-      <label for="name">Имя актера</label>
-      <input type="text" name="name" id="name" th:value="${actor.name}" required>
-    </div>
-
-    <div class="form-group">
-      <label for="description">Описание актера</label>
-      <textarea name="description" id="description" rows="4" required th:text="${actor.description}"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label for="photo">Фото актера</label>
-      <input type="file" name="photo" id="photo" accept="image/*">
-      <img th:src="@{'/images/' + ${actor.photo}}" alt="Фото актера" style="max-width: 100px;">
-    </div>
-
-    <div class="form-group">
-      <input type="submit" value="Сохранить изменения">
-    </div>
-  </form>
+  <div class="form-card">
+    <h1 style="text-align:center;color:#321b0c;margin-bottom:30px;">Редактировать артиста</h1>
+    <form th:action="@{'/admin/actors/edit/' + ${actor.id}}" method="post" enctype="multipart/form-data">
+      <div class="w3-row">
+        <div class="w3-col m8">
+          <label>ФИО</label>
+          <input class="w3-input w3-border" type="text" name="fullName" th:value="${actor.fullName}" required>
+          <label style="margin-top:15px;">Биография</label>
+          <textarea class="w3-input w3-border" name="bio" rows="6" required th:text="${actor.bio}"></textarea>
+          <label style="margin-top:15px;">Новое фото (оставьте пустым, чтобы не менять)</label>
+          <input class="w3-input w3-border" type="file" name="photoFile" accept="image/*">
+        </div>
+        <div class="w3-col m4 w3-center">
+          <p>Текущее фото:</p>
+          <img th:if="${actor.photo != null}" th:src="@{'/uploads/' + ${actor.photo}}" class="current-photo" alt="Фото">
+          <p th:if="${actor.photo == null}">Фото не загружено</p>
+        </div>
+      </div>
+      <button class="btn" style="margin-top:30px;padding:15px 30px;font-size:18px;">Сохранить изменения</button>
+    </form>
+    <a th:href="@{/admin/actors}" style="display:block;margin-top:20px;text-align:center;">← Назад к списку</a>
+  </div>
 </div>
 
 </body>

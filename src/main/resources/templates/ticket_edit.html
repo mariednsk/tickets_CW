@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Редактировать билет</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <style>
+        .edit-form {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 80px auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="w3-row w3-padding">
+        <div class="w3-col s3"><a th:href="@{/}" class="w3-button w3-block">Главная</a></div>
+        <div class="w3-col s3"><a th:href="@{/tickets}" class="w3-button w3-block">Мои билеты</a></div>
+        <div class="w3-col s3">
+            <form th:action="@{/logout}" method="post" style="margin:0;">
+                <button class="w3-button w3-block" type="submit">Выйти</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="edit-form">
+        <h1 style="text-align:center;color:#321b0c;">Редактировать билет</h1>
+        <p style="text-align:center;color:#666;">Можно изменить только имя покупателя</p>
+
+        <form th:action="@{'/tickets/edit/' + ${ticket.id}}" th:object="${ticket}" method="post">
+            <div style="margin-bottom:20px;">
+                <label>Спектакль</label>
+                <input type="text" th:value="${ticket.performance.title}" disabled>
+            </div>
+            <div style="margin-bottom:20px;">
+                <label>Дата и время</label>
+                <input type="text" th:value="${ticket.performance.date + ' ' + ticket.performance.time}" disabled>
+            </div>
+            <div style="margin-bottom:20px;">
+                <label>Место</label>
+                <input type="text"
+                       th:value="${ticket.seat != null ? (ticket.seat.rowLabel + ', место ' + ticket.seat.seatNumber) : 'Не указано'}"
+                       disabled>
+            </div>
+            <div style="margin-bottom:20px;">
+                <label>Имя покупателя</label>
+                <input type="text" th:field="*{buyerName}" required>
+            </div>
+
+            <button class="btn" style="width:100%;padding:15px;">Сохранить</button>
+        </form>
+
+        <div style="text-align:center;margin-top:30px;">
+            <a th:href="@{/tickets}" style="color:#321b0c;">← Назад к билетам</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

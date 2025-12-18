@@ -31,8 +31,12 @@ public class Performance {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false)
     private LocalDate date;
+
+    @Column(nullable = false)
     private LocalTime time;
+
     private String genre;
     private BigDecimal price;
 

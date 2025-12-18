@@ -33,10 +33,17 @@ public class AdminPerformanceController {
 
 
     @GetMapping
-    public String page(Model model) {
-        model.addAttribute("performances", performanceRepo.findAll());
+    public String page(@RequestParam(required = false) String search, Model model) {
+        List<Performance> performances;
+        if (search != null && !search.isEmpty()) {
+            performances = performanceRepo.findByTitleContainingIgnoreCase(search);
+        } else {
+            performances = performanceRepo.findAll();
+        }
+        model.addAttribute("performances", performances);
         model.addAttribute("actors", actorRepo.findAll());
         model.addAttribute("p", new Performance());
+        model.addAttribute("search", search); // чтобы сохранить значение в поле поиска
         return "admin_performances";
     }
 

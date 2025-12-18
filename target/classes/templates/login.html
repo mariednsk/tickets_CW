@@ -14,7 +14,7 @@
       background-color: #ffe5b9;
     }
 
-    /* Фон с картинкой театра */
+    /* Фон с картинкой театра и затемнением */
     .bgimg {
       background-image: url("/images/theatre.jpg"); /* путь к вашей картинке */
       background-position: center;
@@ -27,8 +27,20 @@
       position: relative;
     }
 
-    /* Полупрозрачная карточка входа */
+    /* Затемняющий слой и блюр */
+    .bgimg::before {
+      content: "";
+      position: absolute;
+      top:0; left:0; right:0; bottom:0;
+      background-color: rgba(0,0,0,0.5);
+      backdrop-filter: blur(5px);
+      z-index: 0;
+    }
+
+    /* Полупрозрачная карточка регистрации */
     .auth-card {
+      position: relative; /* выше overlay */
+      z-index: 1;
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(0,0,0,0.2);
       border-radius: 15px;

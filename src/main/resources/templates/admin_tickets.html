@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Управление билетами — Админ-панель</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <style>
+        /* Равномерная шапка — 5 кнопок */
+        .topbar .w3-col { width: 20%; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: #321b0c;
+            color: white;
+            padding: 16px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f8f5f0;
+        }
+
+        .btn {
+            background: #321b0c;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 8px;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #4b3224;
+        }
+
+        .btn-danger {
+            background: #a94442;
+        }
+
+        .btn-danger:hover {
+            background: #c9302c;
+        }
+
+        .no-tickets {
+            text-align: center;
+            padding: 80px;
+            font-size: 20px;
+            color: #888;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Равномерная админская шапка -->
+<div class="topbar">
+    <div class="w3-row w3-padding">
+        <div class="w3-col"><a th:href="@{/admin/dashboard}" class="w3-button w3-block">Панель</a></div>
+        <div class="w3-col"><a th:href="@{/admin/performances}" class="w3-button w3-block">Спектакли</a></div>
+        <div class="w3-col"><a th:href="@{/admin/actors}" class="w3-button w3-block">Актёры</a></div>
+        <div class="w3-col"><a th:href="@{/admin/tickets}" class="w3-button w3-block">Билеты</a></div>
+        <div class="w3-col">
+            <form th:action="@{/logout}" method="post" style="margin:0;">
+                <button class="w3-button w3-block" type="submit">Выйти</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h1 style="text-align:center;color:#321b0c;margin:40px 0;">Управление билетами</h1>
+
+    <div th:if="${tickets.isEmpty()}" class="no-tickets">
+        Пока нет купленных билетов
+    </div>
+
+    <table th:unless="${tickets.isEmpty()}">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Спектакль</th>
+            <th>Дата и время</th>
+            <th>Покупатель</th>
+            <th>Место</th>
+            <th>Цена</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="ticket : ${tickets}">
+            <td th:text="${ticket.id}">1</td>
+            <td th:text="${ticket.eventName}">Название</td>
+            <td th:text="${ticket.performance.date + ' ' + ticket.performance.time}">Дата</td>
+            <td>
+                <span th:text="${ticket.buyerName}">Имя</span>
+                <br>
+                <small th:if="${ticket.user}" th:text="'(' + ${ticket.user.username} + ')'">(@user)</small>
+            </td>
+            <td>
+                    <span th:if="${ticket.seat != null}">
+                        Ряд <span th:text="${ticket.seat.rowLabel}"></span>,
+                        место <span th:text="${ticket.seat.seatNumber}"></span>
+                    </span>
+                <span th:if="${ticket.seat == null}">—</span>
+            </td>
+            <td th:text="${ticket.performance.price} + ' ₽'">1000 ₽</td>
+            <td>
+                <a th:href="@{'/admin/tickets/edit/' + ${ticket.id}}" class="btn">✏️ Редактировать</a>
+                <form th:action="@{'/admin/tickets/delete/' + ${ticket.id}}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger"
+                            onclick="return confirm('Отменить билет? Место освободится.')">
+                        🗑️ Удалить
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

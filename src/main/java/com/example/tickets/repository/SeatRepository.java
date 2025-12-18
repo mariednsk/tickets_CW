@@ -14,6 +14,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
             String rowLabel,
             int seatNumber
     );
+
     void deleteByPerformanceId(Long performanceId);
 
 }

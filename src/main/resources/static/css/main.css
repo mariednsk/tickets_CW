@@ -1,0 +1,49 @@
+/* main.css — общие стили для всего сайта */
+
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Arial Black', Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #321b0c;
+}
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: #321b0c;
+}
+
+.topbar .w3-button {
+    color: white !important;
+    font-weight: bold;
+}
+
+.topbar .w3-button:hover {
+    background-color: #4b3224 !important;
+}
+
+.w3-container {
+    padding: 50px 20px;
+}
+
+.w3-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.w3-tag {
+    background: #321b0c;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+}
+
+footer {
+    background: #321b0c;
+    color: #f5f0eb;
+    text-align: center;
+    padding: 30px;
+    font-size: 16px;
+}

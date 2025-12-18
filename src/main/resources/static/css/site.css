@@ -1,0 +1,121 @@
+:root{
+    --brown-1:#2b160d;
+    --brown-2:#3b2216;
+    --beige-1:#f2dfc7;
+    --beige-2:#e7caa6;
+    --text:#ffffff;
+}
+
+html, body{
+    height:100%;
+    margin:0;
+    font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background:#f5f5f5;
+}
+
+/* Большой заголовок как в примере */
+.hero-title{
+    font-family: "Cormorant Garamond", serif;
+    font-weight: 600;
+    letter-spacing: 1px;
+    font-size: clamp(44px, 6vw, 72px);
+    line-height: 0.95;
+    color: var(--text);
+    text-shadow: 1px 1px 10px rgba(0,0,0,.55);
+}
+
+/* Подзаголовок мелкий */
+.hero-subtitle{
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.9);
+}
+
+/* КНОПКА как у тебя, просто аккуратнее */
+.btn-tickets{
+    background-color:#321b0c;
+    color:white;
+    padding:15px 30px;
+    font-size:20px;
+    border:none;
+    border-radius:6px;
+    text-decoration:none;
+    display:inline-block;
+}
+.btn-tickets:hover{ filter:brightness(1.07); }
+
+/* ====== ГЕРОЙ (твой .bgimg) ====== */
+.bgimg{
+    position:relative;
+    min-height:500px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+
+    /* Слои фона: пятна + градиент + фото */
+    background-image:
+        /* светлое пятно сверху справа */
+            radial-gradient(600px 420px at 90% 10%, rgba(242,223,199,.55), rgba(242,223,199,0) 60%),
+                /* пятно снизу слева */
+            radial-gradient(520px 380px at 8% 85%, rgba(231,202,166,.35), rgba(231,202,166,0) 62%),
+                /* темное пятно по центру */
+            radial-gradient(700px 520px at 55% 55%, rgba(0,0,0,.35), rgba(0,0,0,0) 62%),
+                /* общий градиент */
+            linear-gradient(135deg, var(--brown-1), var(--brown-2) 55%, #1d0f09),
+                /* фото театра (как у тебя) */
+            url("static/images/theatre.jpg");
+
+    background-size:
+            cover, cover, cover,
+            cover,
+            cover;
+
+    background-position:
+            center, center, center,
+            center,
+            center;
+
+    /* важное: фото пусть будет “под” градиентами */
+    background-blend-mode:
+            screen, screen, multiply,
+            normal,
+            soft-light;
+}
+
+/* затемнение + легкий блюр-вайб без blur */
+.bgimg::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: rgba(0,0,0,.22);
+    z-index:0;
+}
+
+/* ЗЕРНО (noise) — сверху на всё */
+.bgimg::after{
+    content:"";
+    position:absolute;
+    inset:-30%;
+    z-index:1;
+    pointer-events:none;
+    opacity:.20;
+
+    /* SVG turbulence как data-uri */
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+    background-repeat:repeat;
+
+    /* чтобы зерно выглядело “киношно” */
+    mix-blend-mode: overlay;
+    transform: rotate(1deg);
+}
+
+/* Контент поверх фона */
+.bgimg .hero-content{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    padding: 60px 16px;
+}
