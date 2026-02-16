@@ -1,22 +1,115 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Артисты</title>
+    <title>Артисты — Справочная система театра</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <style>
+        body { background:#f5f0eb; font-family: "Arial", sans-serif; color:#321b0c; margin:0; }
+        .topbar { position: sticky; top:0; z-index:50; }
+        .container { max-width:1100px; margin:100px auto 60px; padding:0 16px; }
+        h1 { text-align:center; color:#321b0c; margin-bottom:18px; font-size:34px; }
+        .filters { display:flex; gap:12px; justify-content:center; margin-bottom:30px; align-items:center; flex-wrap:wrap; }
+        .filter-input { padding:10px 14px; border-radius:6px; border:1px solid rgba(0,0,0,0.12); font-size:16px; min-width:300px; }
+        .filter-btn { padding:10px 20px; background:#321b0c; color:white; border:none; border-radius:6px; cursor:pointer; font-size:16px; }
+        .filter-btn:hover { background:#4b3224; }
+        .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:24px; }
+        .card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.08); transition: transform .2s ease, box-shadow .2s ease; }
+        .card:hover { transform: translateY(-8px); box-shadow:0 18px 40px rgba(0,0,0,0.14); }
+        .thumb {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            display: block;
+        }
+        .card-content { padding:18px; text-align:center; }
+        .card-title { font-weight:700; margin:0 0 8px; font-size:20px; color:#321b0c; }
+        .card-meta { font-size:14px; color:#6b5b50; }
+        .btn { background:#321b0c; color:white; padding:10px 16px; border-radius:6px; text-decoration:none; display:inline-block; margin-top:12px; }
+        .btn:hover { background:#4b3224; }
+        .pagination { display:flex; gap:8px; justify-content:center; margin-top:40px; flex-wrap:wrap; }
+        .page-btn { padding:8px 14px; border-radius:6px; border:1px solid rgba(0,0,0,0.08); background:white; cursor:pointer; font-weight:bold; }
+        .page-btn.active { background:#321b0c; color:white; }
+        .page-btn:hover:not(.active) { background:#eee; }
+        @media (max-width:600px){ .thumb {height:200px;} .filter-input {min-width:100%;} }
+    </style>
 </head>
 <body>
-<h1>Артисты</h1>
 
-<form method="get" action="/actors">
-    <input name="q" placeholder="Поиск по имени..." th:value="${q}">
-    <button type="submit">Найти</button>
-</form>
+<!-- Шапка — такая же, как на афише -->
+<div class="w3-top topbar">
+    <div class="w3-row w3-padding w3-black">
+        <div class="w3-col s3"><a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a></div>
+        <div class="w3-col s3"><a th:href="@{/actors}" class="w3-button w3-block w3-black">Артисты</a></div>
+        <div class="w3-col s2 m2 l2">
+            <a th:href="@{/about}" class="w3-button w3-block w3-black">Об авторе</a>
+        </div>
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" class="w3-button w3-block w3-black">
+                👤 <span sec:authentication="name"></span>
+            </a>
+        </div>
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <form th:action="@{/logout}" method="post" style="margin:0;">
+                <button class="w3-button w3-block w3-black" type="submit">Выйти</button>
+            </form>
+        </div>
+        <div class="w3-col s3" sec:authorize="isAnonymous()">
+            <a th:href="@{/login}" class="w3-button w3-block w3-black">Вход</a>
+        </div>
+    </div>
+</div>
 
-<div th:each="a : ${actors}">
-    <a th:href="@{'/actors/' + ${a.id}}">
-        <img th:if="${a.photo != null}" th:src="@{'/uploads/' + ${a.photo}}">
-        <span th:text="${a.fullName}"></span>
-    </a>
+<div class="container">
+    <h1>Артисты театра</h1>
+
+    <!-- Поиск -->
+    <div class="filters">
+        <form th:action="@{/actors}" method="get" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;width:100%;">
+            <input type="text" name="q" class="filter-input" th:value="${q}" placeholder="Поиск по ФИО артиста...">
+            <button type="submit" class="filter-btn">Найти</button>
+            <a th:if="${q != null && !q.isBlank()}" th:href="@{/actors}" class="filter-btn" style="background:#a94442;">Сбросить</a>
+        </form>
+    </div>
+
+    <!-- Сетка артистов -->
+    <div th:if="${actors.empty}" style="text-align:center;color:#888;font-size:20px;padding:80px;">
+        Артисты не найдены
+    </div>
+
+    <div class="grid">
+        <div th:each="actor : ${actors.content}" class="card">
+            <a th:href="@{'/actors/' + ${actor.id}}">
+                <img th:src="@{'/uploads/' + ${actor.photo}}"
+                     th:alt="${actor.fullName}"
+                     class="thumb"
+                     onerror="this.src='https://via.placeholder.com/300x320?text=Артист';">
+            </a>
+            <div class="card-content">
+                <h3 class="card-title" th:text="${actor.fullName}">Имя Фамилия</h3>
+                <p class="card-meta" th:text="${#strings.abbreviate(actor.bio, 120)}">Краткая биография...</p>
+                <a th:href="@{'/actors/' + ${actor.id}}" class="btn">Подробнее</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Пагинация — точно как на афише -->
+    <div class="pagination" th:if="${actors.totalPages > 1}">
+        <a th:if="${actors.hasPrevious()}"
+           th:href="@{/actors(q=${q}, page=${actors.number - 1})}"
+           class="page-btn">« Предыдущая</a>
+
+        <span th:each="i : ${#numbers.sequence(0, actors.totalPages - 1)}">
+            <a th:href="@{/actors(q=${q}, page=${i})}"
+               th:text="${i + 1}"
+               th:classappend="${i == actors.number} ? 'active' : ''"
+               class="page-btn"></a>
+        </span>
+
+        <a th:if="${actors.hasNext()}"
+           th:href="@{/actors(q=${q}, page=${actors.number + 1})}"
+           class="page-btn">Следующая »</a>
+    </div>
 </div>
 
 </body>

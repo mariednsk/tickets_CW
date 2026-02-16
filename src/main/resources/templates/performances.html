@@ -38,6 +38,10 @@
 <div class="w3-top topbar">
     <div class="w3-row w3-padding w3-black">
         <div class="w3-col s3"><a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a></div>
+        <div class="w3-col s3"><a th:href="@{/actors}" class="w3-button w3-block w3-black">Артисты</a></div>
+        <div class="w3-col s2 m2 l2">
+            <a th:href="@{/about}" class="w3-button w3-block w3-black">Об авторе</a>
+        </div>
         <div class="w3-col s3" sec:authorize="isAuthenticated()">
             <a th:href="@{/profile}" class="w3-button w3-block w3-black">
                 👤 <span sec:authentication="name"></span>
@@ -131,11 +135,20 @@
         grid.innerHTML = items.map(p => `
 <div class="card">
     <a href="${detailsUrl(p.id)}">
-      <img class="thumb" src="/uploads/${p.image}">
+      <img class="thumb" src="/uploads/${p.image}" alt="${p.title}">
     </a>
     <div class="card-content">
       <div class="card-title">${p.title}</div>
-      <div class="card-meta">${p.genre} · ${p.date} ${p.time}</div>
+      <div class="card-meta">${p.genre} · ${p.date} в ${p.time}</div>
+
+      <!-- НОВОЕ: Артисты -->
+      <div class="card-artists" style="margin-top:12px; font-size:14px; color:#6b5b50;">
+        <strong>Артисты:</strong>
+        ${p.actors && p.actors.length > 0
+            ? p.actors.map(a => `<a href="/actors/${a.id}" style="color:#321b0c; text-decoration:none; font-weight:600;">${a.fullName}</a>`).join(', ')
+            : '<span style="color:#999;">не указаны</span>'
+        }
+      </div>
     </div>
     <div class="card-actions">
       <a class="btn" href="${detailsUrl(p.id)}">Подробнее</a>

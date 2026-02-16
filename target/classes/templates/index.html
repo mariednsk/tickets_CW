@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Справочная система театра</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
     <style>
         .bgimg {
             background-image: url("/images/theatre.jpg");
@@ -74,6 +73,10 @@
     <div class="w3-row w3-padding w3-black">
         <div class="w3-col s3">
             <a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a>
+        </div>
+        <div class="w3-col s3"><a th:href="@{/actors}" class="w3-button w3-block w3-black">Артисты</a></div>
+        <div class="w3-col s2 m2 l2">
+            <a th:href="@{/about}" class="w3-button w3-block w3-black">Об авторе</a>
         </div>
         <div class="w3-col s3" sec:authorize="isAuthenticated()">
             <a th:href="@{/profile}" class="w3-button w3-block w3-black">

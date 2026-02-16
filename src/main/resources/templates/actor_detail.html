@@ -1,22 +1,130 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${a.fullName}">Артист</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${a.fullName + ' — Справочная система театра'}">Артист</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <style>
+        body { background:#f5f0eb; font-family: "Arial", sans-serif; color:#321b0c; margin:0; }
+        .topbar { position: sticky; top:0; z-index:50; }
+        .container { max-width:1100px; margin:100px auto 60px; padding:0 16px; }
+        .artist-header { text-align:center; margin-bottom:50px; }
+        .artist-photo {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 8px solid #321b0c;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .artist-name { font-size:38px; color:#321b0c; margin:30px 0 10px; font-weight:700; }
+        .artist-bio {
+            font-size:18px;
+            line-height:1.8;
+            color:#555;
+            max-width:800px;
+            margin:0 auto 60px;
+            padding:0 20px;
+        }
+        h2 { text-align:center; color:#321b0c; font-size:32px; margin:60px 0 30px; }
+        .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:24px; }
+        .card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.08); transition: transform .2s ease, box-shadow .2s ease; }
+        .card:hover { transform: translateY(-8px); box-shadow:0 18px 40px rgba(0,0,0,0.14); }
+        .thumb { width:100%; height:320px; object-fit:cover; }
+        .card-content { padding:18px; text-align:center; }
+        .card-title { font-size:20px; font-weight:700; color:#321b0c; margin:0 0 8px; }
+        .card-meta { font-size:14px; color:#6b5b50; }
+        .btn { background:#321b0c; color:white; padding:10px 16px; border-radius:6px; text-decoration:none; display:inline-block; margin-top:12px; }
+        .btn:hover { background:#4b3224; }
+        .back-link {
+            display:block;
+            text-align:center;
+            margin:60px 0 40px;
+            font-size:18px;
+            color:#321b0c;
+            text-decoration:none;
+            font-weight:bold;
+        }
+        .back-link:hover { text-decoration:underline; }
+        @media (max-width:600px) {
+            .artist-photo { width:200px; height:200px; }
+            .artist-name { font-size:30px; }
+            .thumb { height:200px; }
+        }
+    </style>
 </head>
 <body>
 
-<h1 th:text="${a.fullName}"></h1>
-<img th:if="${a.photo != null}" th:src="@{'/uploads/' + ${a.photo}}">
-<p th:text="${a.bio}"></p>
+<!-- Шапка — такая же, как на афише и артистах -->
+<div class="w3-top topbar">
+    <div class="w3-row w3-padding w3-black">
+        <div class="w3-col s3"><a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a></div>
+        <div class="w3-col s3"><a th:href="@{/actors}" class="w3-button w3-block w3-black">Артисты</a></div>
+        <div class="w3-col s2 m2 l2">
+            <a th:href="@{/about}" class="w3-button w3-block w3-black">Об авторе</a>
+        </div>
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" class="w3-button w3-block w3-black">
+                👤 <span sec:authentication="name"></span>
+            </a>
+        </div>
+        <div class="w3-col s3" sec:authorize="isAuthenticated()">
+            <form th:action="@{/logout}" method="post" style="margin:0;">
+                <button class="w3-button w3-block w3-black" type="submit">Выйти</button>
+            </form>
+        </div>
+        <div class="w3-col s3" sec:authorize="isAnonymous()">
+            <a th:href="@{/login}" class="w3-button w3-block w3-black">Вход</a>
+        </div>
+    </div>
+</div>
 
-<h2>Спектакли</h2>
-<ul>
-    <li th:each="p : ${performances}">
-        <a th:href="@{'/performances/' + ${p.id}}" th:text="${p.title}"></a>
-    </li>
-</ul>
+<div class="container">
 
-<a href="/actors">← ко всем артистам</a>
+    <!-- Заголовок и фото артиста -->
+    <div class="artist-header">
+        <img th:src="@{'/uploads/' + ${a.photo}}"
+             th:alt="${a.fullName}"
+             class="artist-photo"
+             onerror="this.src='https://via.placeholder.com/300?text=Артист';">
+        <h1 class="artist-name" th:text="${a.fullName}">Имя Фамилия</h1>
+    </div>
+
+    <!-- Биография -->
+    <div class="artist-bio" th:text="${a.bio}" th:if="${a.bio != null && !a.bio.isBlank()}">
+        Биография артиста...
+    </div>
+    <div th:unless="${a.bio != null && !a.bio.isBlank()}" class="artist-bio" style="color:#888;">
+        Биография отсутствует.
+    </div>
+
+    <!-- Спектакли с участием -->
+    <h2>Спектакли с участием артиста</h2>
+
+    <div th:if="${performances.isEmpty()}" style="text-align:center;color:#888;font-size:20px;padding:60px;">
+        Артист пока не участвует в спектаклях
+    </div>
+
+    <div class="grid" th:unless="${performances.isEmpty()}">
+        <div th:each="perf : ${performances}" class="card">
+            <a th:href="@{'/performances/' + ${perf.id}}">
+                <img th:src="@{'/uploads/' + ${perf.image}}"
+                     class="thumb"
+                     onerror="this.src='https://via.placeholder.com/300x320?text=Спектакль';">
+            </a>
+            <div class="card-content">
+                <h3 class="card-title" th:text="${perf.title}">Название спектакля</h3>
+                <p class="card-meta" th:text="${perf.genre + ' · ' + perf.date + ' ' + perf.time}">Жанр · Дата</p>
+                <a th:href="@{'/performances/' + ${perf.id}}" class="btn">Подробнее</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ссылка назад -->
+    <a th:href="@{/actors}" class="back-link">← Ко всем артистам</a>
+
+</div>
+
 </body>
 </html>

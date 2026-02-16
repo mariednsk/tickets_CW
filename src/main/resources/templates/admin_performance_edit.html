@@ -9,7 +9,7 @@
     <style>
         .edit-form {
             background: white;
-            padding: 40px;
+            padding: 40px 60px;
             border-radius: 12px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
             max-width: 900px;
@@ -59,6 +59,7 @@
         <div class="w3-col s2 m2 l2"><a th:href="@{/admin/performances}" class="w3-button w3-block">Спектакли</a></div>
         <div class="w3-col s2 m2 l2"><a th:href="@{/admin/actors}" class="w3-button w3-block">Актёры</a></div>
         <div class="w3-col s2 m2 l2"><a th:href="@{/admin/tickets}" class="w3-button w3-block">Билеты</a></div>
+        <div class="w3-col s2 m2 l2"><a th:href="@{/admin/stats}" class="w3-button w3-block">Статистика</a></div>
         <div class="w3-col s2 m2 l2">
             <form th:action="@{/logout}" method="post" style="margin:0;">
                 <button class="w3-button w3-block" type="submit">Выйти</button>

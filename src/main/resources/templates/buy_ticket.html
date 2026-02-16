@@ -44,6 +44,10 @@
 <div class="w3-top topbar">
     <div class="w3-row w3-padding w3-black">
         <div class="w3-col s3"><a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a></div>
+        <div class="w3-col s3"><a th:href="@{/actors}" class="w3-button w3-block w3-black">Артисты</a></div>
+        <div class="w3-col s2 m2 l2">
+            <a th:href="@{/about}" class="w3-button w3-block w3-black">Об авторе</a>
+        </div>
         <div class="w3-col s3" sec:authorize="isAuthenticated()">
             <a th:href="@{/profile}" class="w3-button w3-block w3-black">Личный кабинет</a>
         </div>
