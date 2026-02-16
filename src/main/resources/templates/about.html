@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Об авторе — Справочная система театра</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: #f5f5f5;
+      color: #321b0c;
+    }
+
+    .w3-top .w3-button { font-weight: bold; }
+
+    .about-container {
+      max-width: 900px;
+      margin: 120px auto 60px;
+      padding: 40px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    .avatar {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 6px solid #321b0c;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      color: #321b0c;
+    }
+
+    .info {
+      font-size: 1.3rem;
+      line-height: 2;
+      margin: 30px 0;
+    }
+
+    .info strong {
+      color: #321b0c;
+    }
+
+    .tech {
+      margin: 40px 0;
+      font-size: 1.2rem;
+    }
+
+    .tech span {
+      display: inline-block;
+      background: #321b0c;
+      color: white;
+      padding: 10px 20px;
+      margin: 8px;
+      border-radius: 30px;
+      font-weight: bold;
+    }
+
+    .dates {
+      margin-top: 50px;
+      font-size: 1.4rem;
+      color: #321b0c;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Главная шапка (как на всех страницах) -->
+<div class="w3-top">
+  <div class="w3-row w3-padding w3-black">
+    <div class="w3-col s2 m2 l2">
+      <a th:href="@{/}" class="w3-button w3-block w3-black">Главная</a>
+    </div>
+    <div class="w3-col s2 m2 l2">
+      <a th:href="@{/performances}" class="w3-button w3-block w3-black">Афиша</a>
+    </div>
+    <div class="w3-col s2 m2 l2" sec:authorize="isAuthenticated()">
+      <a th:href="@{/profile}" class="w3-button w3-block w3-black">
+        👤 <span sec:authentication="name"></span>
+      </a>
+    </div>
+    <div class="w3-col s2 m2 l2" sec:authorize="isAuthenticated()">
+      <a th:href="@{/tickets}" class="w3-button w3-block w3-black">Мои билеты</a>
+    </div>
+    <div class="w3-col s2 m2 l2">
+      <a th:href="@{/about}" class="w3-button w3-block w3-black">Об авторе</a>
+    </div>
+    <div class="w3-col s2 m2 l2" sec:authorize="isAnonymous()">
+      <a th:href="@{/login}" class="w3-button w3-block w3-black">Вход</a>
+    </div>
+    <div class="w3-col s2 m2 l2" sec:authorize="isAuthenticated()">
+      <form th:action="@{/logout}" method="post" style="margin:0;">
+        <button class="w3-button w3-block w3-black" type="submit">Выйти</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="about-container">
+  <!-- Замени фото на своё, если хочешь — положи в static/img/author.jpg -->
+  <img src="/static/images/author.jpg" alt="Фото автора" class="avatar"
+       onerror="this.src='https://via.placeholder.com/180?text=Автор';">
+
+  <h1>Об авторе</h1>
+
+  <div class="info">
+    <p><strong>ФИО:</strong>Донская Мария Дмитриевна</p>
+    <p><strong>Группа:</strong>ПИ23-2</p>
+    <p><strong>Учебное заведение:</strong>Финансовый университет при правительстве РФ</p>
+    <p><strong>Контакты:</strong> donmasiku15@gmail.com | +79162303792</p>
+  </div>
+
+  <div class="tech">
+    <p><strong>Технологии проекта:</strong></p>
+    <span>Spring Boot</span>
+    <span>Spring Security</span>
+    <span>Spring Data JPA</span>
+    <span>Thymeleaf</span>
+    <span>MySQL</span>
+    <span>Hibernate</span>
+    <span>Lombok</span>
+    <span>HTML/CSS</span>
+    <span>JavaScript (Chart.js)</span>
+  </div>
+
+  <div class="dates">
+    <p>Начало работы над проектом: октябрь 2025</p>
+    <p>Завершение работы: декабрь 2025</p>
+  </div>
+
+  <p style="margin-top:50px; font-size:1.1rem; color:#666;">
+    Проект разработан в рамках курсовой работы по дисциплине "Современные технологии программирования".<br>
+    Спасибо за использование справочной системы театра! 🎭
+  </p>
+</div>
+
+</body>
+</html>

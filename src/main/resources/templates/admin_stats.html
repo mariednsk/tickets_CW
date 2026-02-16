@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Статистика — Админ-панель</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .topbar .w3-col { width: 16.66%; } /* 6 кнопок */
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        .stat-card h3 {
+            font-size: 36px;
+            margin: 10px 0;
+            color: #321b0c;
+        }
+        canvas {
+            max-width: 700px;
+            margin: 50px auto;
+            display: block;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Шапка админа -->
+<div class="topbar">
+    <div class="w3-row w3-padding">
+        <div class="w3-col"><a th:href="@{/admin/dashboard}" class="w3-button w3-block">Панель</a></div>
+        <div class="w3-col"><a th:href="@{/admin/performances}" class="w3-button w3-block">Спектакли</a></div>
+        <div class="w3-col"><a th:href="@{/admin/actors}" class="w3-button w3-block">Актёры</a></div>
+        <div class="w3-col"><a th:href="@{/admin/tickets}" class="w3-button w3-block">Билеты</a></div>
+        <div class="w3-col"><a th:href="@{/admin/stats}" class="w3-button w3-block">Статистика</a></div>
+        <div class="w3-col">
+            <form th:action="@{/logout}" method="post" style="margin:0;">
+                <button class="w3-button w3-block" type="submit">Выйти</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h1 style="text-align:center;color:#321b0c;margin:60px 0 40px;">Статистика театра</h1>
+
+    <!-- Карточки со статистикой -->
+    <div class="w3-row-padding">
+        <div class="w3-third">
+            <div class="stat-card">
+                <h3 th:text="${totalUsers}">0</h3>
+                <p>Всего пользователей</p>
+            </div>
+        </div>
+        <div class="w3-third">
+            <div class="stat-card">
+                <h3 th:text="${totalTickets}">0</h3>
+                <p>Куплено билетов</p>
+            </div>
+        </div>
+        <div class="w3-third">
+            <div class="stat-card">
+                <h3 th:text="${#numbers.formatDecimal(totalRevenue, '0', '2')} + ' ₽'">0 ₽</h3>
+                <p>Общая выручка</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Круговая диаграмма: выручка по спектаклям -->
+    <h2 style="text-align:center;margin:60px 0 20px;color:#321b0c;">Выручка по спектаклям</h2>
+    <canvas id="revenueChart"></canvas>
+
+    <!-- Если нет данных — сообщение -->
+    <div th:if="${revenueByPerformance.isEmpty()}" style="text-align:center;font-size:20px;color:#888;margin:100px 0;">
+        Пока нет купленных билетов для отображения статистики
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Безопасно извлекаем данные из Thymeleaf
+    const revenueData = /*[[${revenueByPerformance}]]*/ {};
+    const labels = Object.keys(revenueData);
+    const values = Object.values(revenueData);
+
+    if (labels.length > 0) {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',  // ← круговая диаграмма
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Выручка (₽)',
+                    data: values,
+                    backgroundColor: [
+                        '#321b0c', '#4b3224', '#a94442', '#c9302c', '#d9534f',
+                        '#5cb85c', '#5bc0de', '#f0ad4e', '#d9534f', '#337ab7'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 14 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                let value = context.parsed;
+                                return label + ': ' + value.toFixed(2) + ' ₽';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    /*]]>*/
+</script>
+
+</body>
+</html>
